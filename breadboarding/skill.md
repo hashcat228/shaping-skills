@@ -126,7 +126,8 @@ Places are first-class elements in the data model. Each Place gets an ID:
 | # | Place | Description |
 |---|-------|-------------|
 | P1 | CMS Page (Read Mode) | View-only state |
-| P2 | CMS Page (Edit Mode) | Editing state with CRUD controls |
+| P2 | CMS Page (Edit Mode) | Editing state with page-level controls |
+| P2.1 | widget-grid (letters) | Subplace: letter editing widget within P2 |
 | P3 | Letter Form Modal | Form for adding/editing letters |
 | P4 | Backend | API resolvers and database |
 
@@ -134,6 +135,52 @@ Place IDs enable:
 - **Explicit navigation wiring** — wire `→ P2` instead of to an affordance inside
 - **Containment tracking** — each affordance declares which Place it belongs to
 - **Consistent Mermaid subgraphs** — subgraph ID matches Place ID
+
+### Subplaces
+
+A **subplace** is a defined subset of a Place — a contained area that groups related affordances. Use subplaces when:
+- A Place contains multiple distinct widgets or sections
+- You're detailing one part of a larger Place
+- You want to show what's in scope vs out of scope
+
+**Notation:** Use hierarchical IDs — `P2.1`, `P2.2`, etc. for subplaces of P2.
+
+```
+| # | Place | Description |
+|---|-------|-------------|
+| P2 | Dashboard | Main dashboard page |
+| P2.1 | Sales widget | Subplace: sales metrics |
+| P2.2 | Activity feed | Subplace: recent activity |
+```
+
+In affordance tables, use the subplace ID to show containment:
+
+```
+| U3 | P2.1 | sales-widget | "Refresh" button | click | → N4 | — |
+| U7 | P2.2 | activity-feed | activity list | render | — | — |
+```
+
+**In Mermaid:** Nest the subplace subgraph inside the parent. Use the same background color (no distinct fill) — the subplace is part of the parent, not a separate Place:
+
+```mermaid
+subgraph P2["P2: Dashboard"]
+    subgraph P2.1["P2.1: Sales widget"]
+        U3["U3: Refresh button"]
+    end
+    subgraph P2.2["P2.2: Activity feed"]
+        U7["U7: activity list"]
+    end
+    otherContent[["... other dashboard content ..."]]
+end
+```
+
+**Placeholder for out-of-scope content:** When detailing one subplace, add a placeholder sibling to show there's more on the page:
+
+```
+otherContent[["... other page content ..."]]
+```
+
+This tells readers: "we're zooming in on P2.1, but P2 contains more that we're not detailing."
 
 ### Containment vs Wiring
 
