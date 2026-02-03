@@ -1,5 +1,7 @@
 # Shaping Skills
 
+> ⚠️ **Alpha / Experimental** — These skills are under active development. Expect rough edges.
+
 Claude Code skills for collaborative product shaping and system understanding.
 
 ---
@@ -68,8 +70,9 @@ The question it helps answer: **"What are we solving, and which approach best fi
 | **Requirements** | R0, R1, R2... | Problem constraints (what we need) |
 | **Shapes** | A, B, C... | Solution options (pick one) |
 | **Parts** | A1, A2, A3... | Parts of a shape (combine within shape) |
-| **Alternatives** | C3-A, C3-B... | Approaches to a component (pick one per component) |
+| **Alternatives** | A1-a, A1-b... | Approaches to a part (pick one per part) |
 | **Fit Check** | R × S matrix | Decision matrix: ✅ pass, ❌ fail |
+| **Spike** | — | Investigation task to learn how the system works |
 
 ### Phases
 
@@ -89,6 +92,17 @@ Shaping → Slicing → Implementation
 | **Frame** | The "why" — problem, outcome, source material |
 | **Shaping doc** | Ground truth — R, shapes, fit checks, breadboard |
 | **Slices doc** | Implementation plan — vertical slices with demos |
+
+### Spikes
+
+A spike is an investigation task to learn how the existing system works and what concrete steps are needed to implement a part. Use spikes when there's uncertainty about mechanics or feasibility.
+
+Spikes answer questions like:
+- "Where is the X logic?"
+- "What changes are needed to achieve Y?"
+- "Which constraints affect this approach?"
+
+The output is understanding — enough to describe the steps needed. Spikes gather information; decisions come afterward based on that information.
 
 ### Integration with Breadboarding
 
