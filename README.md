@@ -60,4 +60,49 @@ Breadboards fill the gap between "high-level architecture" and "read the code." 
 
 ## Shaping
 
-*(Documentation coming soon)*
+Shaping is a formalism for interacting with Claude Code when you want to iterate on both the requirements and different solution options. It provides notation and structure for exploring what to build before committing to implementation.
+
+### Why Use a Formalism?
+
+When you're shaping a feature with Claude, you're often going back and forth — refining what you actually need while sketching how you might build it. Without structure, this gets messy: requirements blur with solutions, trade-offs get lost, and it's hard to compare approaches.
+
+The shaping formalism gives you:
+- **Notation** — R0, R1... for requirements; A, B, C... for solution shapes
+- **Separation** — requirements define constraints independent of any particular approach
+- **Comparison** — fit checks (R × S matrices) reveal which shape best fits your constraints
+- **Traceability** — decisions are recorded, not lost in conversation
+
+The question it helps answer: **"What are we solving, and which approach best fits our constraints?"**
+
+### Core Concepts
+
+| Concept | Notation | Meaning |
+|---------|----------|---------|
+| **Requirements** | R0, R1, R2... | Problem constraints (what we need) |
+| **Shapes** | A, B, C... | Solution options (pick one) |
+| **Parts** | A1, A2, A3... | Parts of a shape (combine within shape) |
+| **Alternatives** | C3-A, C3-B... | Approaches to a component (pick one per component) |
+| **Fit Check** | R × S matrix | Decision matrix: ✅ pass, ❌ fail |
+
+### Phases
+
+```
+Shaping → Slicing → Implementation
+```
+
+| Phase | Purpose | Output |
+|-------|---------|--------|
+| **Shaping** | Explore problem and solution space | Requirements, shapes, fit checks, breadboard |
+| **Slicing** | Break down for incremental delivery | Vertical slices with demo-able UI |
+
+### Documents
+
+| Document | Purpose |
+|----------|---------|
+| **Frame** | The "why" — problem, outcome, source material |
+| **Shaping doc** | Ground truth — R, shapes, fit checks, breadboard |
+| **Slices doc** | Implementation plan — vertical slices with demos |
+
+### Integration with Breadboarding
+
+Once a shape is selected, use `/breadboarding` to detail it into concrete affordances. The breadboard shows exactly what users can do and how it wires together — making the shape concrete enough to slice and build.
