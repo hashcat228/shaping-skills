@@ -528,6 +528,19 @@ When the user provides source material during framing (user requests, quotes, em
 - **Slices doc**: Created when ready to slice, updated as slice scope clarifies
 - **Slice plans**: Individual files (V1-plan.md, etc.) with implementation details
 
+### Frontmatter
+
+Every shaping document (shaping doc, frame, slices doc) must include `shaping: true` in its YAML frontmatter. This enables tooling hooks (e.g., ripple-check reminders) that help maintain consistency across documents.
+
+```markdown
+---
+shaping: true
+---
+
+# [Feature Name] — Shaping
+...
+```
+
 ### Keeping Documents in Sync
 
 See **Multi-Level Consistency** at the top of this document. Changes at any level must ripple to affected levels above and below.
@@ -552,6 +565,10 @@ After a shape is breadboarded, slice it into vertical implementation increments.
 User is shaping a search feature:
 
 ```markdown
+---
+shaping: true
+---
+
 ## Requirements (R)
 
 | ID | Requirement | Status |
