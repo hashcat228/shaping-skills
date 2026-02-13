@@ -15,9 +15,10 @@ Shaping produces documents at different levels of abstraction. **Truth must stay
 
 ### The Document Hierarchy (high to low)
 
-1. **Shaping doc** — ground truth for R's, shapes, parts, fit checks
-2. **Slices doc** — ground truth for slice definitions, breadboards
-3. **Individual slice plans** (V1-plan, etc.) — ground truth for implementation details
+1. **Big Picture** — highest level, designed for quick context acquisition
+2. **Shaping doc** — ground truth for R's, shapes, parts, fit checks
+3. **Slices doc** — ground truth for slice definitions, breadboards
+4. **Individual slice plans** (V1-plan, etc.) — ground truth for implementation details
 
 ### The Principle
 
@@ -25,8 +26,8 @@ Each level summarizes or provides a view into the level(s) below it. Lower level
 
 **Changes ripple in both directions:**
 
-- **Change at high level → trickles down:** If you change the shaping doc's parts table, update the slices doc too.
-- **Change at low level → trickles up:** If a slice plan reveals a new mechanism or changes the scope of a slice, the Slices doc and shaping doc must reflect that.
+- **Change at high level → trickles down:** If you flag a part as ⚠️ in the Big Picture, update the shaping doc's parts table too.
+- **Change at low level → trickles up:** If a slice plan reveals a new mechanism or changes the scope of a slice, the Slices doc and Big Picture must reflect that.
 
 ### The Practice
 
@@ -37,7 +38,7 @@ Whenever making a change:
 3. **Update all affected levels in the same operation**
 4. **Never let documents drift out of sync**
 
-The system only works if the levels are consistent with each other.
+The Big Picture isn't a static snapshot — it's a live summary that must stay connected to its source documents. The system only works if the levels are consistent with each other.
 
 ---
 
@@ -131,6 +132,20 @@ Shaping → Slicing
 
 You can't slice without a breadboarded shape.
 
+### Big Picture Through Time
+
+The Big Picture is a living document that reflects the current state of truth at lower levels:
+
+| Stage | Big Picture Contains |
+|-------|---------------------|
+| **Exploring shapes** | Not needed yet — still comparing options |
+| **Shape selected** | Frame + Shape (fit check, parts, breadboard) |
+| **Shape breadboarded** | Same, with full wiring diagram |
+| **After slicing** | Adds Slices section (sliced breadboard + grid) |
+| **During implementation** | Updated as slices complete (✅/⏳ status) |
+
+The Big Picture always summarizes what exists in the ground truth documents. It evolves as shaping and implementation progress.
+
 ---
 
 ## Fit Check (Decision Matrix)
@@ -218,6 +233,7 @@ These can happen in any order:
 - **Breadboard** - Map the system to understand where changes happen and make the shape more concrete
 - **Spike** - Investigate unknowns to identify concrete steps needed
 - **Decide** - Pick alternatives, compose final solution
+- **Create Big Picture** - Once a shape is selected, create the Big Picture summary
 - **Slice** - Break a breadboarded shape into vertical slices for implementation
 
 ## Communication
@@ -466,10 +482,244 @@ Shaping produces up to four documents. Each has a distinct role:
 
 | Document | Contains | Purpose |
 |----------|----------|---------|
+| **Big Picture** | Frame summary, Fit Check, Parts, Breadboard, Sliced Breadboard, Slices grid | 10,000-foot view — quick context for driver and developer |
 | **Frame** | Source, Problem, Outcome | The "why" — concise, stakeholder-level |
 | **Shaping doc** | Requirements, Shapes (CURRENT/A/B/...), Affordances, Breadboard, Fit Check | The working document — exploration and iteration happen here |
 | **Slices doc** | Slice details, affordance tables per slice, wiring diagrams | The implementation plan — how to build incrementally |
 | **Slice plans** | V1-plan.md, V2-plan.md, etc. | Individual implementation plans for each slice |
+
+### Big Picture Document
+
+The Big Picture is a one-page summary that shows the entire shaped feature at a glance. It helps:
+- **The driver** see the whole thing and track what we're doing
+- **The developer** maintain context about requirements and shape while working in slices
+
+**When to create:** After a shape is selected and breadboarded, optionally before slicing is complete. The Big Picture evolves as slicing and implementation progress.
+
+---
+
+#### Structure — Exactly Three Sections
+
+```markdown
+# [Feature Name] — Big Picture
+
+**Selected shape:** [Letter] ([Short description])
+
+---
+
+## Frame
+
+### Problem
+- [Pain points as bullet list]
+
+### Outcome
+- [Success criteria as bullet list]
+
+---
+
+## Shape
+
+### Fit Check (R × [Selected Shape])
+[Fit check table]
+
+### Parts
+[Parts table with Flag column]
+
+### Breadboard
+[Full Mermaid breadboard]
+
+---
+
+## Slices
+
+[Sliced breadboard — Mermaid diagram with slice boundaries]
+
+[Slices grid — markdown table]
+```
+
+---
+
+#### Frame Section
+
+Copy Problem and Outcome from the Frame doc or shaping doc. Use bullet lists.
+
+```markdown
+## Frame
+
+### Problem
+
+- Users cannot search letter content to find what they're looking for
+- When users navigate to a letter detail and come back, pagination state is lost
+- Page refresh loses any filter state
+
+### Outcome
+
+- Users can search letters by content directly from the index page
+- Search and scroll state survives page refresh
+- Browser back button restores previous state
+```
+
+---
+
+#### Shape Section
+
+Contains three parts: Fit Check, Parts, and Breadboard.
+
+**Fit Check (R × [Shape]):**
+
+Show only the selected shape column. Full requirement text in every row.
+
+```markdown
+### Fit Check (R × F)
+
+| Req | Requirement | Status | F |
+|-----|-------------|--------|---|
+| R0 | Make letters searchable from the index page | Core goal | ✅ |
+| R2 | Navigate back to pagination state when returning from post detail | Must-have | ✅ |
+| R3 | Navigate back to search state when returning from post detail | Must-have | ✅ |
+```
+
+**Parts table:**
+
+Include the Flag column for flagged unknowns. Use "Flag" as the header, ⚠️ in flagged rows. Center-align with `:----:`.
+
+```markdown
+### Parts
+
+| Part | Mechanism | Flag |
+|------|-----------|:----:|
+| **F1** | Create `letter-browser` widget (component, def, register in CMS) | |
+| **F2** | URL state & initialization (read `?q=` `?page=`, restore on load) | |
+| **F3** | Search input (debounce, min 3 chars, triggers search) | ⚠️ |
+```
+
+**Breadboard:**
+
+Include the full Mermaid breadboard from the shaping doc. Use `flowchart TB` (top-to-bottom). Include:
+- Place subgraphs (`subgraph lettersIndex["PLACE: Letters Index Page"]`)
+- Component subgraphs nested inside places
+- UI affordances (U1, U2...) and Non-UI affordances (N1, N2...)
+- Wires Out as solid arrows (`-->`)
+- Returns To as dashed arrows (`-.->`)
+- Node styling (pink for UI, grey for Non-UI)
+
+Always include a legend after the breadboard:
+
+```markdown
+**Legend:**
+- **Pink nodes (U)** = UI affordances (things users see/interact with)
+- **Grey nodes (N)** = Code affordances (data stores, handlers, services)
+- **Solid lines** = Wires Out (calls, triggers, writes)
+- **Dashed lines** = Returns To (return values, data store reads)
+```
+
+---
+
+#### Slices Section
+
+Contains two parts: Sliced Breadboard and Slices Grid.
+
+**Sliced Breadboard:**
+
+A modified version of the main breadboard with slice boundaries shown as colored subgraphs.
+
+Key patterns:
+- **Slice subgraphs**: `subgraph slice1["V1: SLICE NAME"]` — wrap each slice's affordances
+- **Invisible links for ordering**: `slice1 ~~~ slice2` — forces V1 before V2 in layout
+- **Colored fills**: Each slice gets a distinct fill color and matching stroke
+- **Transparent nested subgraphs**: Components inside slices use `fill:transparent` to inherit the slice color
+
+```mermaid
+flowchart TB
+    subgraph slice1["V1: WIDGET WITH REAL DATA"]
+        subgraph letterBrowser1["letter-browser"]
+            U2["U2: loading spinner"]
+            U3["U3: no results msg"]
+            N3["N3: performSearch"]
+        end
+        N4["N4: rawSearch"]
+    end
+
+    subgraph slice2["V2: SEARCH WORKS"]
+        U1["U1: search input"]
+        N1["N1: activeQuery.next"]
+    end
+
+    %% Force slice ordering (invisible links)
+    slice1 ~~~ slice2
+
+    %% Cross-slice wiring
+    U1 -->|type| N1
+    N1 --> N3
+    N3 --> N4
+
+    %% Slice boundary styling (colored fills)
+    style slice1 fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
+    style slice2 fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+
+    %% Nested subgraphs transparent (inherit slice color)
+    style letterBrowser1 fill:transparent,stroke:#888,stroke-width:1px
+
+    %% Node styling
+    classDef ui fill:#ffb6c1,stroke:#d87093,color:#000
+    classDef nonui fill:#d3d3d3,stroke:#808080,color:#000
+    class U1,U2,U3 ui
+    class N1,N3,N4 nonui
+```
+
+**Slice color palette** (use consistently):
+- V1: `fill:#e8f5e9,stroke:#4caf50` (green)
+- V2: `fill:#e3f2fd,stroke:#2196f3` (blue)
+- V3: `fill:#fff3e0,stroke:#ff9800` (orange)
+- V4: `fill:#f3e5f5,stroke:#9c27b0` (purple)
+- V5: `fill:#fff8e1,stroke:#ffc107` (yellow)
+- V6: `fill:#fce4ec,stroke:#e91e63` (pink)
+
+**Slices Grid:**
+
+A markdown table with an empty header row. Aim for 2 rows × 3 columns (6 slices) or 3 rows × 3 columns (9 slices).
+
+Each cell contains:
+- **Linked title**: `**[V1: SLICE NAME](./feature-v1-plan.md)**` (link to slice plan file)
+- **Status**: `✅ COMPLETE` or `⏳ PENDING`
+- **Bullet list**: 3-4 key items using `• ` (bullet + space)
+- **Demo**: Italicized description of what can be demoed
+- **Use `<br>` for line breaks** within cells
+- **Use `• &nbsp;`** as a spacer bullet to equalize cell heights
+
+```markdown
+|  |  |  |
+|:--|:--|:--|
+| **[V1: WIDGET WITH REAL DATA](./letter-search-v1-plan.md)**<br>✅ COMPLETE<br><br>• Create letter-browser widget<br>• Register in CMS system<br>• rawSearch() with parentId<br>• Loading, empty, results UI<br><br>*Demo: Widget shows real letters* | **[V2: SEARCH WORKS](./letter-search-v2-plan.md)**<br>✅ COMPLETE<br><br>• Search input + activeQuery<br>• Debounce 90ms, min 3 chars<br>• Query passed to rawSearch()<br>• &nbsp;<br><br>*Demo: Type "dharma", results filter live* | **[V3: INFINITE SCROLL](./letter-search-v3-plan.md)**<br>✅ COMPLETE<br><br>• Intercom scroll subscription<br>• appendNextPage()<br>• Re-arm scroll detection<br>• &nbsp;<br><br>*Demo: Scroll down, more letters load* |
+| **[V4: URL STATE](./letter-search-v4-plan.md)**<br>✅ COMPLETE<br><br>• ?q= and ?page= in URL<br>• initializeState() on load<br>• Router.navigate() on change<br>• Back button restores state<br><br>*Demo: Search, refresh, back all restore state* | **[V5: COMPACT MODE](./letter-search-v5-plan.md)**<br>✅ COMPLETE<br><br>• data.compact config<br>• Conditional scroll subscribe<br>• "See all X results" link<br>• Navigate with ?q=query<br><br>*Demo: compact=true shows fixed items + "See all" link* | **V6: CUTOVER**<br>⏳ PENDING<br><br>a) Local validation + R14<br>b) Deploy code (safe)<br>c) CMS cutover<br>d) Code cleanup<br><br>*TODO: Typesense index job* |
+```
+
+Note: Slices that are pending don't need links yet. Add links when the slice plan is created.
+
+---
+
+#### Creating a Big Picture — Step by Step
+
+1. **Create the file**: `[feature]-big-picture.md` in the shaping docs folder
+
+2. **Add header**: Feature name and selected shape with short description
+
+3. **Frame section**: Copy Problem and Outcome from Frame doc or shaping doc
+
+4. **Shape section**:
+   - Copy Fit Check from shaping doc, showing only selected shape column
+   - Copy Parts table, add Flag column if not present (mark any unknowns with ⚠️)
+   - Copy full Mermaid breadboard from shaping doc
+   - Add legend after breadboard
+
+5. **Slices section** (after slicing is complete):
+   - Create sliced breadboard by wrapping affordances in slice subgraphs
+   - Add invisible links between slices for ordering
+   - Add colored fills to slice subgraphs
+   - Make nested component subgraphs transparent
+   - Create slices grid table with linked titles, status, bullets, demos
+
+6. **Maintain consistency**: When lower-level docs change, update the Big Picture to reflect those changes (see Multi-Level Consistency)
 
 ### Document Lifecycle
 
@@ -479,6 +729,8 @@ Frame (problem/outcome)
 Shaping (explore, detail, breadboard)
     ↓
 Slices (plan implementation)
+    ↓
+Big Picture (summarizes all of the above)
 ```
 
 **Frame** can be written first — it captures the "why" before any solution work begins. It contains:
@@ -522,24 +774,14 @@ When the user provides source material during framing (user requests, quotes, em
 
 **Slices doc** is created when the selected shape is breadboarded and ready to build. It contains the slice breakdown, affordance tables per slice, and detailed wiring.
 
+**Big Picture** is created once a shape is selected. It summarizes the Frame, Shape, and (once slicing is done) Slices. It stays in sync with the ground truth documents throughout implementation.
+
 ### File Management
 
 - **Shaping doc**: Update freely as you iterate — this is the ground truth
 - **Slices doc**: Created when ready to slice, updated as slice scope clarifies
 - **Slice plans**: Individual files (V1-plan.md, etc.) with implementation details
-
-### Frontmatter
-
-Every shaping document (shaping doc, frame, slices doc) must include `shaping: true` in its YAML frontmatter. This enables tooling hooks (e.g., ripple-check reminders) that help maintain consistency across documents.
-
-```markdown
----
-shaping: true
----
-
-# [Feature Name] — Shaping
-...
-```
+- **Big Picture**: Created when shape is selected, updated to reflect lower-level changes
 
 ### Keeping Documents in Sync
 
@@ -565,10 +807,6 @@ After a shape is breadboarded, slice it into vertical implementation increments.
 User is shaping a search feature:
 
 ```markdown
----
-shaping: true
----
-
 ## Requirements (R)
 
 | ID | Requirement | Status |
